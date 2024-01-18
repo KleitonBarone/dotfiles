@@ -19,6 +19,7 @@ git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.
 - ~~Make bootstrap script clone and link files~~
 - Make bootsrap script install zsh and oh-my-zsh
 - Make bootsrap script install git
+- Add option to script to not override files
 - Add more dotfiles
 
 ## Author
