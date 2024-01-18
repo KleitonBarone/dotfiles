@@ -10,9 +10,13 @@ Currently WIP - does not work.
 
 WIP - does not work
 
+```
+git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.sh
+```
+
 #### TODO
 
-- Make bootstrap script clone and link files
+- ~~Make bootstrap script clone and link files~~
 - Make bootsrap script install zsh and oh-my-zsh
 - Make bootsrap script install git
 - Add more dotfiles
