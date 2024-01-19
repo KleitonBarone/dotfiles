@@ -1,12 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Get root
-SCRIPT_PATH=`realpath $0`
-DOTFILES=`dirname $SCRIPT_PATH`
+# Set failsafe bash params
+set -e
 
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
+# Get file paths
+SCRIPT_PATH=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DOTFILES=$SCRIPT_PATH/config
 
 force_link(){
     local src="$1"
@@ -15,8 +14,8 @@ force_link(){
 }
 
 link_files(){
-for f in `ls -A $DOTFILES/config`; do
-    force_link "$DOTFILES/config/$f"
+for f in `ls -A $DOTFILES`; do
+    force_link "$DOTFILES/$f"
 done
 }
 
