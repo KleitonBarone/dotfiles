@@ -7,6 +7,17 @@ set -e
 SCRIPT_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 DOTFILES=$SCRIPT_PATH/config
 
+# Install git
+echo "Installing git"
+sudo apt install git -y
+
+# Install zsh
+echo "Installing zsh"
+sudo apt install zsh -y
+# Set default shell to zsh
+echo "Setting zsh as default shell"
+sudo usermod -s /usr/bin/zsh "${SUDO_USER:-$USER}"
+
 force_link() {
     local src="$1"
     local dest="$HOME/$(basename $src)"
@@ -19,19 +30,17 @@ link_files() {
     done
 }
 
+echo "Linking dot files"
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
     link_files
-    echo "Finished Successfully"
-    exit 0
+else
+    read -p "This may overwrite existing files in your home directory. Are you sure? (y/N) " OVERRIDE_REPLY
+    if [[ $OVERRIDE_REPLY =~ ^[Yy]$ ]]; then
+        link_files
+    else
+        echo "Skipped Linking dot files"
+    fi
 fi
 
-read -p "This may overwrite existing files in your home directory. Are you sure? (y/N) " -n 1
-echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    link_files
-    echo "Finished Successfully"
-    exit 0
-fi
-
-echo "Ended without linking"
+echo "Finished Successfully"
 exit 0
