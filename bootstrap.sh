@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Set failsafe bash params
-set -e
-
 # Get file paths
 SCRIPT_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 DOTFILES=$SCRIPT_PATH/config
@@ -17,6 +14,12 @@ sudo apt install zsh -y
 # Set default shell to zsh
 echo "Setting zsh as default shell"
 sudo usermod -s /usr/bin/zsh "${SUDO_USER:-$USER}"
+
+#Install oh-my-zsh
+echo "Installing oh-my-zsh"
+wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O "${SCRIPT_PATH}/oh-my-zsh-installer.sh"
+sudo chmod +x "${SCRIPT_PATH}/oh-my-zsh-installer.sh"
+ZSH= "${SCRIPT_PATH}/oh-my-zsh-installer.sh" --unattended --keep-zshrc
 
 force_link() {
     local src="$1"
