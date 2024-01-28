@@ -21,6 +21,9 @@ wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -
 sudo chmod +x "${SCRIPT_PATH}/oh-my-zsh-installer.sh"
 ZSH= "${SCRIPT_PATH}/oh-my-zsh-installer.sh" --unattended --keep-zshrc
 
+#Install powerlevel10k zsh theme
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
 force_link() {
     local src="$1"
     local dest="$HOME/$(basename $src)"
