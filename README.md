@@ -21,8 +21,8 @@ git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.
 - ~~Make bootsrap script install git~~
 - ~~Make bootsrap script install oh-my-zsh~~
 - ~~Make bootsrap script install power10k theme~~
+- ~~Add option to script to not override files~~
 - Make bootsrap script add fonts
-- Add option to script to not override files
 - Add more dotfiles
 
 ## Author
