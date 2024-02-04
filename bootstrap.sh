@@ -2,7 +2,8 @@
 
 # Get file paths
 SCRIPT_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-DOTFILES=$SCRIPT_PATH/config
+DOTFILES_FOLDER=$SCRIPT_PATH/config
+FONTS_FOLDER=$SCRIPT_PATH/fonts
 
 # Install git
 echo "Installing git"
@@ -31,28 +32,55 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 force_link() {
-    local src="$1"
-    local dest="$HOME/$(basename $src)"
-    ln -sf "$src" "$dest"
+    local src="${1}"
+    local dest="${HOME}/$(basename ${src})"
+    ln -sf "${src}" "${dest}"
 }
 
-link_files() {
-    for f in $(ls -A $DOTFILES); do
-        force_link "$DOTFILES/$f"
+link_dotfiles() {
+    for f in $(ls -A "${DOTFILES_FOLDER}"); do
+        force_link "${DOTFILES_FOLDER}/${f}"
+    done
+}
+
+force_copy_to_fonts() {
+    local src="${1}"
+    local dest="${HOME}/.fonts/$(basename ${src})"
+    cp -f "${src}" "${dest}"
+}
+
+copy_font_files() {
+    mkdir -p "${HOME}/.fonts"
+    for f in $(ls -A "${FONTS_FOLDER}"); do
+        force_copy_to_fonts "${FONTS_FOLDER}/${f}"
     done
 }
 
 echo "Linking dot files"
-if [ "$1" == "--force" -o "$1" == "-f" ]; then
-    link_files
+if [ "${1}" == "--force" -o "${1}" == "-f" ]; then
+    link_dotfiles
 else
     read -p "This may overwrite existing files in your home directory. Are you sure? (y/N) " OVERRIDE_REPLY
     if [[ $OVERRIDE_REPLY =~ ^[Yy]$ ]]; then
-        link_files
+        link_dotfiles
     else
         echo "Skipped Linking dot files"
     fi
 fi
 
-echo "Finished Successfully"
+echo "Copying font files"
+if [ "${1}" == "--force" -o "${1}" == "-f" ]; then
+    copy_font_files
+else
+    read -p "This may overwrite existing files in your .fonts directory. Are you sure? (y/N) " OVERRIDE_FONTS_REPLY
+    if [[ $OVERRIDE_FONTS_REPLY =~ ^[Yy]$ ]]; then
+        copy_font_files
+    else
+        echo "Skipped copying font files"
+    fi
+fi
+
+echo "Finished Successfully."
+echo "Remember to end current session or reboot to apply changes."
+echo "After reboot change terminal font to Martian Mono Nerd Font or another that contain the necessary symbols for the p10k theme."
 exit 0
