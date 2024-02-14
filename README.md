@@ -8,8 +8,30 @@
 
 **Script only works in Debian based distros (eg: Mint, Ubuntu, etc) other distros have to be manually installed**
 
+#### Using git
+
 ```
 git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.sh
+```
+
+#### Without git
+
+Download master branch
+
+```
+wget https://github.com/KleitonBarone/dotfiles/archive/master.tar.gz
+```
+
+Uncompress file
+
+```
+tar -xzvf master.tar.gz
+```
+
+Run script
+
+```
+./dotfiles-master/bootstrap.sh
 ```
 
 ## Author
