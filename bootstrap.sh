@@ -9,6 +9,14 @@ BACKUP_DIR="${HOME}/dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 
 # Flags
 FORCE=false
+IS_CODESPACES=false
+
+if [ "${CODESPACES:-}" == "true" ]; then
+    IS_CODESPACES=true
+    FORCE=true
+    echo "Running in GitHub Codespaces environment."
+fi
+
 if [ "${1:-}" == "--force" ] || [ "${1:-}" == "-f" ]; then
     FORCE=true
 fi
@@ -23,44 +31,48 @@ else
     echo "Git is already installed"
 fi
 
-# Install zsh
-if ! command -v zsh &> /dev/null; then
-    echo "Installing zsh"
-    sudo apt install zsh -y
-    # Set default shell to zsh
-    echo "Setting zsh as default shell"
-    sudo usermod -s /usr/bin/zsh "${SUDO_USER:-$USER}"
+if [ "$IS_CODESPACES" = false ]; then
+    # Install zsh
+    if ! command -v zsh &> /dev/null; then
+        echo "Installing zsh"
+        sudo apt install zsh -y
+        # Set default shell to zsh
+        echo "Setting zsh as default shell"
+        sudo usermod -s /usr/bin/zsh "${SUDO_USER:-$USER}"
+    else
+        echo "Zsh is already installed"
+    fi
+
+    # Install oh-my-zsh
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        echo "Installing oh-my-zsh"
+        sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended --keep-zshrc
+    else
+        echo "Oh My Zsh is already installed"
+    fi
+
+    # Install powerlevel10k
+    P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    if [ ! -d "$P10K_DIR" ]; then
+        echo "Installing powerlevel10k"
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+    else
+        echo "Powerlevel10k is already installed"
+    fi
+
+    # Install plugins
+    ZSH_PLUGINS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
+    if [ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ]; then
+        echo "Installing zsh-syntax-highlighting"
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting"
+    fi
+
+    if [ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ]; then
+        echo "Installing zsh-autosuggestions"
+        git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
+    fi
 else
-    echo "Zsh is already installed"
-fi
-
-# Install oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "Installing oh-my-zsh"
-    sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended --keep-zshrc
-else
-    echo "Oh My Zsh is already installed"
-fi
-
-# Install powerlevel10k
-P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-if [ ! -d "$P10K_DIR" ]; then
-    echo "Installing powerlevel10k"
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
-else
-    echo "Powerlevel10k is already installed"
-fi
-
-# Install plugins
-ZSH_PLUGINS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
-if [ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ]; then
-    echo "Installing zsh-syntax-highlighting"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting"
-fi
-
-if [ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ]; then
-    echo "Installing zsh-autosuggestions"
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
+    echo "Skipping Zsh setup for Codespaces."
 fi
 
 # Install FZF
@@ -81,11 +93,29 @@ else
     echo "NVM is already installed"
 fi
 
+# Configure NVM in bashrc for Codespaces
+if [ "$IS_CODESPACES" = true ]; then
+    if ! grep -q "export NVM_DIR" "$HOME/.bashrc"; then
+        echo "Configuring NVM in .bashrc"
+        echo 'export NVM_DIR="$HOME/.nvm"' >> "$HOME/.bashrc"
+        echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$HOME/.bashrc"
+        echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> "$HOME/.bashrc"
+    fi
+fi
+
 # Backup and Link Function
 backup_and_link() {
     local src="${1}"
     local dest="${HOME}/$(basename ${src})"
     
+    # Skip .zshrc and .p10k.zsh in Codespaces
+    if [ "$IS_CODESPACES" = true ]; then
+        if [[ "$src" == *".zshrc" ]] || [[ "$src" == *".p10k.zsh" ]]; then
+            echo "Skipping $src for Codespaces"
+            return
+        fi
+    fi
+
     if [ -e "${dest}" ]; then
         mkdir -p "${BACKUP_DIR}"
         mv "${dest}" "${BACKUP_DIR}/"
@@ -109,19 +139,23 @@ copy_font_files() {
     echo "Fonts copied."
 }
 
-if [ "$FORCE" = true ]; then
-    copy_font_files
-else
-    read -p "Copy fonts to ~/.fonts? (Y/n) " COPY_FONTS_REPLY
-    if [[ $COPY_FONTS_REPLY =~ ^[Nn]$ ]]; then
-        echo "Skipped copying font files"
-    else
+if [ "$IS_CODESPACES" = false ]; then
+    if [ "$FORCE" = true ]; then
         copy_font_files
+    else
+        read -p "Copy fonts to ~/.fonts? (Y/n) " COPY_FONTS_REPLY
+        if [[ $COPY_FONTS_REPLY =~ ^[Nn]$ ]]; then
+            echo "Skipped copying font files"
+        else
+            copy_font_files
+        fi
     fi
+else
+    echo "Skipping fonts for Codespaces."
 fi
 
 # Git Identity Prompt
-if [ "$FORCE" = false ]; then
+if [ "$FORCE" = false ] && [ "$IS_CODESPACES" = false ]; then
     CURRENT_NAME=$(git config --global user.name || true)
     if [ -z "$CURRENT_NAME" ]; then
         echo "Git user.name is not set."
@@ -138,7 +172,7 @@ fi
 # Backup Cleanup Prompt
 if [ -d "${BACKUP_DIR}" ]; then
     echo "Backup created at ${BACKUP_DIR}"
-    if [ "$FORCE" = false ]; then
+    if [ "$FORCE" = false ] && [ "$IS_CODESPACES" = false ]; then
         read -p "Do you want to DELETE this backup? (y/N) " DELETE_BACKUP
         if [[ $DELETE_BACKUP =~ ^[Yy]$ ]]; then
             rm -rf "${BACKUP_DIR}"
@@ -150,4 +184,8 @@ if [ -d "${BACKUP_DIR}" ]; then
 fi
 
 echo "Finished Successfully."
-echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
+if [ "$IS_CODESPACES" = true ]; then
+    echo "Please run 'source ~/.bashrc' to apply changes."
+else
+    echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
+fi
