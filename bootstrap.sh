@@ -89,6 +89,16 @@ else
     echo "NVM is already installed"
 fi
 
+# Install Biome
+if ! command -v biome &> /dev/null; then
+    echo "Installing Biome"
+    curl -L https://github.com/biomejs/biome/releases/download/@biomejs/biome@2.3.8/biome-linux-x64 -o biome
+    chmod +x biome
+    sudo mv biome /usr/local/bin/biome
+else
+    echo "Biome is already installed"
+fi
+
 # Backup and Link Function
 backup_and_link() {
     local src="${1}"
