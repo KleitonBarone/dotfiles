@@ -31,7 +31,6 @@ else
     echo "Git is already installed"
 fi
 
-if [ "$IS_CODESPACES" = false ]; then
     # Install zsh
     if ! command -v zsh &> /dev/null; then
         echo "Installing zsh"
@@ -71,9 +70,6 @@ if [ "$IS_CODESPACES" = false ]; then
         echo "Installing zsh-autosuggestions"
         git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
     fi
-else
-    echo "Skipping Zsh setup for Codespaces."
-fi
 
 # Install FZF
 if [ ! -d "$HOME/.fzf" ]; then
@@ -93,28 +89,10 @@ else
     echo "NVM is already installed"
 fi
 
-# Configure NVM in bashrc for Codespaces
-if [ "$IS_CODESPACES" = true ]; then
-    if ! grep -q "export NVM_DIR" "$HOME/.bashrc"; then
-        echo "Configuring NVM in .bashrc"
-        echo 'export NVM_DIR="$HOME/.nvm"' >> "$HOME/.bashrc"
-        echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$HOME/.bashrc"
-        echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> "$HOME/.bashrc"
-    fi
-fi
-
 # Backup and Link Function
 backup_and_link() {
     local src="${1}"
     local dest="${HOME}/$(basename ${src})"
-    
-    # Skip .zshrc and .p10k.zsh in Codespaces
-    if [ "$IS_CODESPACES" = true ]; then
-        if [[ "$src" == *".zshrc" ]] || [[ "$src" == *".p10k.zsh" ]]; then
-            echo "Skipping $src for Codespaces"
-            return
-        fi
-    fi
 
     if [ -e "${dest}" ]; then
         mkdir -p "${BACKUP_DIR}"
@@ -155,7 +133,7 @@ else
 fi
 
 # Git Identity Prompt
-if [ "$FORCE" = false ] && [ "$IS_CODESPACES" = false ]; then
+if [ "$FORCE" = false ]; then
     CURRENT_NAME=$(git config --global user.name || true)
     if [ -z "$CURRENT_NAME" ]; then
         echo "Git user.name is not set."
@@ -172,7 +150,7 @@ fi
 # Backup Cleanup Prompt
 if [ -d "${BACKUP_DIR}" ]; then
     echo "Backup created at ${BACKUP_DIR}"
-    if [ "$FORCE" = false ] && [ "$IS_CODESPACES" = false ]; then
+    if [ "$FORCE" = false ]; then
         read -p "Do you want to DELETE this backup? (y/N) " DELETE_BACKUP
         if [[ $DELETE_BACKUP =~ ^[Yy]$ ]]; then
             rm -rf "${BACKUP_DIR}"
@@ -184,8 +162,4 @@ if [ -d "${BACKUP_DIR}" ]; then
 fi
 
 echo "Finished Successfully."
-if [ "$IS_CODESPACES" = true ]; then
-    echo "Please run 'source ~/.bashrc' to apply changes."
-else
-    echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
-fi
+echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
