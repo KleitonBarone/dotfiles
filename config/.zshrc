@@ -54,6 +54,7 @@ git
 colored-man-pages
 zsh-syntax-highlighting
 zsh-autosuggestions
+fzf
 )
 source $ZSH/oh-my-zsh.sh
 # User configuration

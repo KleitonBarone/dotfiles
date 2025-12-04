@@ -1,39 +1,70 @@
-# Kleiton’s dotfiles
+# Kleiton’s Dotfiles
 
-## Installation
+A collection of configuration files and a bootstrap script to set up a productive development environment on Debian-based Linux distributions (Ubuntu, Mint, etc.).
 
-**Warning:** If you want to use these dotfiles, you should fork this repository, and remove things you don’t want or need. Use at your own risk!
+## ✨ Features
 
-### Bootstrap script
+- **Shell**: [Zsh](https://www.zsh.org/) configured as the default shell.
+- **Framework**: [Oh My Zsh](https://ohmyz.sh/) for managing Zsh configuration.
+- **Theme**: [Powerlevel10k](https://github.com/romkatv/powerlevel10k) for a fast, flexible, and informative prompt.
+- **Plugins**:
+  - `zsh-syntax-highlighting`: Highlights commands as you type.
+  - `zsh-autosuggestions`: Suggests commands based on history.
+- **Git**: Pre-configured global `.gitconfig`.
+- **Fonts**: Installs [Martian Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts) (and others) for proper icon support.
 
-**Script only works in Debian based distros (eg: Mint, Ubuntu, etc) other distros have to be manually installed**
+## ⚠️ Prerequisites
 
-#### Using git
+This setup is designed for **Debian-based distributions** (e.g., Ubuntu, Linux Mint, Pop!_OS).
+The `bootstrap.sh` script uses `apt` for package management.
 
-```
+> **Warning**: If you want to use these dotfiles, it is highly recommended to **fork this repository** and review the code. Remove or modify configurations to suit your needs. Use at your own risk!
+
+## 🚀 Installation
+
+### Option 1: Quick Start (Recommended)
+
+Clone the repository and run the bootstrap script in one go:
+
+```bash
 git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.sh
 ```
 
-#### Without git
+### Option 2: Manual Download (No Git)
 
-Download master branch
+If you don't have git installed yet or prefer a manual approach:
 
-```
-wget https://github.com/KleitonBarone/dotfiles/archive/master.tar.gz
-```
+1.  **Download the repository:**
+    ```bash
+    wget https://github.com/KleitonBarone/dotfiles/archive/master.tar.gz
+    ```
 
-Uncompress file
+2.  **Extract the archive:**
+    ```bash
+    tar -xzvf master.tar.gz
+    ```
 
-```
-tar -xzvf master.tar.gz
-```
+3.  **Run the script:**
+    ```bash
+    ./dotfiles-master/bootstrap.sh
+    ```
 
-Run script
+## 🛠️ What the Script Does
 
-```
-./dotfiles-master/bootstrap.sh
-```
+The `bootstrap.sh` script automates the following:
+1.  Installs `git` and `zsh` using `apt`.
+2.  Sets `zsh` as the default shell for the current user.
+3.  Installs **Oh My Zsh**.
+4.  Clones and configures **Powerlevel10k**, **zsh-syntax-highlighting**, and **zsh-autosuggestions**.
+5.  Symlinks dotfiles from the `config` directory to your home directory (`~`).
+6.  Installs custom fonts to `~/.fonts`.
 
-## Author
+## 📝 Post-Installation
+
+1.  **Restart your session**: Log out and log back in, or restart your computer to ensure all changes (especially the shell change) take effect.
+2.  **Configure Terminal Font**: Open your terminal preferences and set the font to **Martian Mono Nerd Font** (or another Nerd Font installed by the script) to ensure icons in the Powerlevel10k prompt render correctly.
+3.  **Powerlevel10k Configuration**: Upon first launch of zsh, the Powerlevel10k configuration wizard should start automatically. If not, run `p10k configure`.
+
+## 👤 Author
 
 [Kleiton Barone](https://github.com/KleitonBarone)
