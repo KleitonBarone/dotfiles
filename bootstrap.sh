@@ -117,19 +117,15 @@ copy_font_files() {
     echo "Fonts copied."
 }
 
-if [ "$IS_CODESPACES" = false ]; then
-    if [ "$FORCE" = true ]; then
-        copy_font_files
-    else
-        read -p "Copy fonts to ~/.fonts? (Y/n) " COPY_FONTS_REPLY
-        if [[ $COPY_FONTS_REPLY =~ ^[Nn]$ ]]; then
-            echo "Skipped copying font files"
-        else
-            copy_font_files
-        fi
-    fi
+if [ "$FORCE" = true ]; then
+    copy_font_files
 else
-    echo "Skipping fonts for Codespaces."
+    read -p "Copy fonts to ~/.fonts? (Y/n) " COPY_FONTS_REPLY
+    if [[ $COPY_FONTS_REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipped copying font files"
+    else
+        copy_font_files
+    fi
 fi
 
 # Git Identity Prompt
