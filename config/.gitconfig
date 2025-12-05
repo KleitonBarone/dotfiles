@@ -10,6 +10,7 @@
 [core]
         excludesfile = ~/.gitignore
         editor = code --wait
+        autocrlf = input
 [apply]
         whitespace = nowarn
 [mergetool]
@@ -26,3 +27,15 @@
         default = simple
 [init]
     defaultBranch = main
+[fetch]
+    prune = true
+[rebase]
+    autoStash = true
+[commit]
+    verbose = true
+[pull]
+    rebase = true
+[rerere]
+    enabled = true
+[merge]
+    conflictstyle = zdiff3

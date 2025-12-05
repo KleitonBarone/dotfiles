@@ -21,20 +21,60 @@ if [ "${1:-}" == "--force" ] || [ "${1:-}" == "-f" ]; then
     FORCE=true
 fi
 
+# Detect OS and Package Manager
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$NAME
+        DISTRO_ID=$ID
+    else
+        echo "Cannot detect OS. Defaulting to Debian-like."
+        OS="Debian"
+        DISTRO_ID="debian"
+    fi
+}
+
+detect_os
+echo "Detected OS: $OS ($DISTRO_ID)"
+
+install_package() {
+    PACKAGE=$1
+    echo "Installing $PACKAGE..."
+    
+    case $DISTRO_ID in
+        debian|ubuntu|pop|kali|linuxmint)
+            sudo apt update -y > /dev/null 2>&1 || true # Update only if possible/needed, suppress output
+            sudo apt install -y "$PACKAGE"
+            ;;
+        fedora|rhel|centos|almalinux|rocky)
+            sudo dnf install -y "$PACKAGE"
+            ;;
+        arch|manjaro|endeavouros)
+            # Arch needs explicit sync sometimes, but usually -S is enough. 
+            # --noconfirm for non-interactive
+            sudo pacman -S --noconfirm "$PACKAGE"
+            ;;
+        *)
+            echo "Unsupported distribution: $DISTRO_ID"
+            echo "Please install $PACKAGE manually."
+            return 1
+            ;;
+    esac
+}
+
+
 echo "Starting dotfiles installation..."
 
 # Install git
 if ! command -v git &> /dev/null; then
-    echo "Installing git"
-    sudo apt install git -y
+    install_package git
 else
     echo "Git is already installed"
 fi
 
     # Install zsh
     if ! command -v zsh &> /dev/null; then
-        echo "Installing zsh"
-        sudo apt install zsh -y
+        install_package zsh
         # Set default shell to zsh
         echo "Setting zsh as default shell"
         sudo usermod -s /usr/bin/zsh "${SUDO_USER:-$USER}"
