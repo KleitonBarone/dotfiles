@@ -27,6 +27,9 @@ detect_os() {
         . /etc/os-release
         OS=$NAME
         DISTRO_ID=$ID
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        OS="macOS"
+        DISTRO_ID="macos"
     else
         echo "Cannot detect OS. Defaulting to Debian-like."
         OS="Debian"
@@ -54,6 +57,9 @@ install_package() {
             # --noconfirm for non-interactive
             sudo pacman -S --noconfirm "$PACKAGE"
             ;;
+        macos)
+            brew install "$PACKAGE"
+            ;;
         *)
             echo "Unsupported distribution: $DISTRO_ID"
             echo "Please install $PACKAGE manually."
@@ -64,6 +70,23 @@ install_package() {
 
 
 echo "Starting dotfiles installation..."
+
+# Install Homebrew on macOS
+if [ "$DISTRO_ID" == "macos" ]; then
+    if ! command -v brew &> /dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        
+        # Add Homebrew to PATH for the current session (standard paths)
+        if [ -f "/opt/homebrew/bin/brew" ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [ -f "/usr/local/bin/brew" ]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+        fi
+    else
+        echo "Homebrew is already installed"
+    fi
+fi
 
 # Install git
 if ! command -v git &> /dev/null; then
@@ -132,9 +155,13 @@ fi
 # Install Biome
 if ! command -v biome &> /dev/null; then
     echo "Installing Biome"
-    curl -L https://github.com/biomejs/biome/releases/download/@biomejs/biome@2.3.8/biome-linux-x64 -o biome
-    chmod +x biome
-    sudo mv biome /usr/local/bin/biome
+    if [ "$DISTRO_ID" == "macos" ]; then
+        brew install biome
+    else
+        curl -L https://github.com/biomejs/biome/releases/download/@biomejs/biome@2.3.8/biome-linux-x64 -o biome
+        chmod +x biome
+        sudo mv biome /usr/local/bin/biome
+    fi
 else
     echo "Biome is already installed"
 fi
@@ -160,11 +187,16 @@ done
 
 # Fonts
 copy_font_files() {
-    mkdir -p "${HOME}/.fonts"
+    if [ "$DISTRO_ID" == "macos" ]; then
+        FONT_DIR="${HOME}/Library/Fonts"
+    else
+        FONT_DIR="${HOME}/.fonts"
+    fi
+    mkdir -p "$FONT_DIR"
     for f in $(ls -A "${FONTS_FOLDER}"); do
-        cp -f "${FONTS_FOLDER}/${f}" "${HOME}/.fonts/"
+        cp -f "${FONTS_FOLDER}/${f}" "$FONT_DIR/"
     done
-    echo "Fonts copied."
+    echo "Fonts copied to $FONT_DIR."
 }
 
 if [ "$FORCE" = true ]; then
