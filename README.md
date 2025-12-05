@@ -1,6 +1,6 @@
 # Kleiton’s Dotfiles
 
-A collection of configuration files and a bootstrap script to set up a productive development environment on Debian-based Linux distributions (Ubuntu, Mint, etc.).
+A collection of configuration files and a bootstrap script to set up a productive development environment on Linux (Debian, Fedora, Arch) and macOS.
 
 ## ✨ Features
 
@@ -10,13 +10,26 @@ A collection of configuration files and a bootstrap script to set up a productiv
 - **Plugins**:
   - `zsh-syntax-highlighting`: Highlights commands as you type.
   - `zsh-autosuggestions`: Suggests commands based on history.
+- **Tools**:
+  - `fzf`: Command-line fuzzy finder.
+  - `nvm`: Node Version Manager.
+  - `biome`: Fast formatter and linter for web projects.
 - **Git**: Pre-configured global `.gitconfig`.
 - **Fonts**: Installs [Martian Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts) (and others) for proper icon support.
 
 ## ⚠️ Prerequisites
 
-This setup is designed for **Debian-based distributions** (e.g., Ubuntu, Linux Mint, Pop!_OS).
-The `bootstrap.sh` script uses `apt` for package management.
+The `bootstrap.sh` script attempts to detect your OS and use the appropriate package manager.
+
+**Supported Systems:**
+- **Debian-based**: Ubuntu, Linux Mint, Pop!_OS, Kali (uses `apt`)
+- **RHEL-based**: Fedora, CentOS, AlmaLinux, Rocky (uses `dnf`)
+- **Arch-based**: Arch Linux, Manjaro, EndeavourOS (uses `pacman`)
+- **macOS**: Uses `brew` (will install Homebrew if missing)
+
+**Requirements:**
+- `curl` or `wget` (usually pre-installed)
+- `git` (the script will attempt to install it if missing, but it's needed to clone initially)
 
 > **Warning**: If you want to use these dotfiles, it is highly recommended to **fork this repository** and review the code. Remove or modify configurations to suit your needs. Use at your own risk!
 
@@ -24,7 +37,7 @@ The `bootstrap.sh` script uses `apt` for package management.
 
 ### Option 1: Quick Start (Recommended)
 
-Clone the repository and run the bootstrap script in one go:
+Clone the repository and run the bootstrap script:
 
 ```bash
 git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.sh
@@ -32,7 +45,7 @@ git clone https://github.com/KleitonBarone/dotfiles.git && ./dotfiles/bootstrap.
 
 ### Option 2: Manual Download (No Git)
 
-If you don't have git installed yet or prefer a manual approach:
+If you don't have git installed yet:
 
 1.  **Download the repository:**
     ```bash
@@ -49,15 +62,22 @@ If you don't have git installed yet or prefer a manual approach:
     ./dotfiles-master/bootstrap.sh
     ```
 
+### Flags
+
+- `--force` or `-f`: Force execution, skipping some confirmation prompts (useful for automated setups like Codespaces).
+
 ## 🛠️ What the Script Does
 
 The `bootstrap.sh` script automates the following:
-1.  Installs `git` and `zsh` using `apt`.
-2.  Sets `zsh` as the default shell for the current user.
-3.  Installs **Oh My Zsh**.
-4.  Clones and configures **Powerlevel10k**, **zsh-syntax-highlighting**, and **zsh-autosuggestions**.
-5.  Symlinks dotfiles from the `config` directory to your home directory (`~`).
-6.  Installs custom fonts to `~/.fonts`.
+1.  Detects the OS and Package Manager.
+2.  Installs **Homebrew** (on macOS only).
+3.  Installs `git`, `zsh`, and `biome` using the system package manager.
+4.  Sets `zsh` as the default shell.
+5.  Installs **Oh My Zsh**.
+6.  Clones and configures **Powerlevel10k**, **zsh-syntax-highlighting**, and **zsh-autosuggestions**.
+7.  Installs **FZF** and **NVM**.
+8.  Symlinks dotfiles from the `config` directory to your home directory (`~`), backing up existing ones.
+9.  Installs custom fonts (on Linux to `~/.fonts`, on macOS to `~/Library/Fonts`).
 
 ## 📝 Post-Installation
 
